@@ -71,15 +71,15 @@ function extractKeywords(prompt: string): string {
   const keywords = ['웹 개발', '백엔드', '프론트엔드', '풀스택', '데이터 분석', 'AI/ML'];
   
   for (const keyword of keywords) {
-    if (prompt.includes(keyword)) {
+    if (prompt.indexOf(keyword) !== -1) {
       return keyword;
     }
   }
   
   // 일반적인 키워드 추출
-  if (prompt.includes('개발')) return '소프트웨어 개발';
-  if (prompt.includes('데이터')) return '데이터 처리';
-  if (prompt.includes('AI') || prompt.includes('인공지능')) return 'AI 기술';
+  if (prompt.indexOf('개발') !== -1) return '소프트웨어 개발';
+  if (prompt.indexOf('데이터') !== -1) return '데이터 처리';
+  if (prompt.indexOf('AI') !== -1 || prompt.indexOf('인공지능') !== -1) return 'AI 기술';
   
   return 'IT 기술';
 }
