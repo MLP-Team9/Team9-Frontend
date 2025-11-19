@@ -1,20 +1,64 @@
 import { Button } from './ui/button';
-import { ArrowLeft, Copy, Download, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Copy, Download, CheckCircle, AlertCircle, Lightbulb, TrendingUp } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
+
+interface FeedbackResult {
+  score: number;
+  strengths: string[];
+  weaknesses: string[];
+  missing_keywords: string[];
+  overall_advice: string;
+}
 
 interface ResultScreenProps {
   coverLetter: string;
   userPrompt: string;
   onBack: () => void;
+  isLoading: boolean;
+
+  // API 응답 전체
+  apiResponse: {
+    feedback_result: string;
+    cheer_message: string;
+  } | null;
+
+  // 선택적 기존 값
+  feedbackResult?: string;      // JSON string
+  feedbackRewrite?: string;     // 첨삭된 자소서
 }
 
-export function ResultScreen({ coverLetter, userPrompt, onBack }: ResultScreenProps) {
+export function ResultScreen({
+  coverLetter,
+  apiResponse,
+  onBack,
+  feedbackResult,
+  feedbackRewrite
+}: ResultScreenProps) {
   const [copied, setCopied] = useState(false);
+
+ // feedback 선택 소스
+  let feedback: FeedbackResult | null = null;
+
+  if (feedbackResult) {
+    try {
+      feedback = JSON.parse(feedbackResult);
+    } catch (err) {
+      console.error("Failed to parse feedbackResult:", err);
+    }
+  } else if (apiResponse) {
+    try {
+      feedback = JSON.parse(apiResponse.feedback_result);
+    } catch (err) {
+      console.error("Failed to parse apiResponse.feedback_result:", err);
+    }
+  }
+
+  const finalCoverLetter = feedbackRewrite || coverLetter;
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(coverLetter);
+      await navigator.clipboard.writeText(finalCoverLetter);
       setCopied(true);
       toast.success('클립보드에 복사되었습니다!');
       setTimeout(() => setCopied(false), 2000);
@@ -25,7 +69,7 @@ export function ResultScreen({ coverLetter, userPrompt, onBack }: ResultScreenPr
 
   const handleDownload = () => {
     const element = document.createElement('a');
-    const file = new Blob([coverLetter], { type: 'text/plain' });
+    const file = new Blob([finalCoverLetter], { type: 'text/plain' });
     element.href = URL.createObjectURL(file);
     element.download = '자기소개서.txt';
     document.body.appendChild(element);
@@ -34,91 +78,148 @@ export function ResultScreen({ coverLetter, userPrompt, onBack }: ResultScreenPr
     toast.success('자소서가 다운로드되었습니다!');
   };
 
+  // 색상 라벨 함수
+  const getScoreColor = (score: number) => {
+    if (score >= 90) return 'text-green-600 bg-green-50 border-green-200';
+    if (score >= 80) return 'text-blue-600 bg-blue-50 border-blue-200';
+    if (score >= 70) return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+    return 'text-orange-600 bg-orange-50 border-orange-200';
+  };
+
+  const getScoreLabel = (score: number) => {
+    if (score >= 90) return '우수';
+    if (score >= 80) return '양호';
+    if (score >= 70) return '보통';
+    return '개선 필요';
+  };
+
   return (
     <div className="min-h-screen p-4 py-8">
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-5xl mx-auto space-y-6">
+
         {/* 헤더 */}
         <div className="flex items-center justify-between">
-          <Button
-            onClick={onBack}
-            variant="ghost"
-            className="text-gray-700 hover:text-gray-900"
-          >
+          <Button onClick={onBack} variant="ghost" className="text-gray-700 hover:text-gray-900 cursor-pointer">
             <ArrowLeft className="w-5 h-5 mr-2" />
             다시 작성하기
           </Button>
-          
+
           <div className="flex gap-2">
-            <Button
-              onClick={handleCopy}
-              variant="outline"
-              className="bg-white"
-            >
+            <Button onClick={handleCopy} variant="outline" className="bg-white">
               <Copy className="w-4 h-4 mr-2" />
-              {copied ? '복사됨!' : '복사하기'}
+              {copied ? "복사됨!" : "복사하기"}
             </Button>
-            <Button
-              onClick={handleDownload}
-              variant="outline"
-              className="bg-white"
-            >
+
+            <Button onClick={handleDownload} variant="outline" className="bg-white">
               <Download className="w-4 h-4 mr-2" />
               다운로드
             </Button>
           </div>
         </div>
 
-        {/* 요청사항 카드 */}
-        <div className="bg-indigo-50 rounded-xl p-6 border border-indigo-100">
-          <div className="flex items-start gap-3">
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-              <RefreshCw className="w-4 h-4 text-white" />
+        {/* 분석 결과 */}
+        {feedback && (
+          <div className="flex flex-wrap gap-6">
+            {/* 점수 */}
+            <div className="flex-1 min-w-[280px] bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <div className="flex items-center gap-3 mb-4">
+                <TrendingUp className="w-5 h-5 text-indigo-600" />
+                <h3 className="text-gray-900">종합 점수</h3>
+              </div>
+
+              <div className={`flex items-center justify-center py-8 rounded-lg border-2 ${getScoreColor(feedback.score)}`}>
+                <div className="text-center">
+                  <div className="text-5xl mb-2">{feedback.score}</div>
+                  <div className="text-sm">{getScoreLabel(feedback.score)}</div>
+                </div>
+              </div>
             </div>
-            <div className="flex-1">
-              <h3 className="text-indigo-900 mb-2">
-                요청사항
-              </h3>
-              <p className="text-gray-700">
-                {userPrompt}
-              </p>
+
+            {/* 키워드 */}
+            <div className="flex-1 min-w-[280px] bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <div className="flex items-center gap-3 mb-4">
+                <Lightbulb className="w-5 h-5 text-amber-600" />
+                <h3 className="text-gray-900">누락된 키워드</h3>
+              </div>
+
+              {feedback.missing_keywords.length ? (
+                feedback.missing_keywords.map((k, i) => (
+                  <div key={i} className="bg-amber-50 px-3 py-2 rounded-lg flex items-center gap-2 text-gray-700">
+                    <span className="text-amber-600">•</span>
+                    {k}
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 text-sm">모든 키워드가 포함되어 있습니다! 👍</p>
+              )}
+            </div>
+
+            {/* 강점 */}
+            <div className="flex-1 min-w-[280px] bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <div className="flex items-center gap-3 mb-4">
+                <CheckCircle className="w-5 h-5 text-green-600" />
+                <h3 className="text-gray-900">강점</h3>
+              </div>
+
+              <div className='flex flex-col gap-1'>
+              {feedback.strengths.map((s, i) => (
+                <div key={i} className="flex gap-3 ">
+                  <span className="text-green-600">✓</span>
+                  <p className="flex items-center text-gray-700 text-sm">{s}</p>
+                </div>
+              ))}
+              </div>
+            </div>
+
+            {/* 약점 */}
+            <div className="flex-1 min-w-[280px] bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <div className="flex items-center gap-3 mb-4">
+                <AlertCircle className="w-5 h-5 text-orange-600" />
+                <h3 className="text-gray-900">약점</h3>
+              </div>
+
+              <div className='flex flex-col gap-1'>
+              {feedback.weaknesses.length ? (
+                feedback.weaknesses.map((w, i) => (
+                  <div key={i} className="flex gap-3">
+                    <span className="text-orange-600">!</span>
+                    <p className="flex items-center text-gray-700 text-sm">{w}</p>
+                  </div>
+                ))
+                
+              ) : (
+                <p className="text-gray-500 text-sm">특별한 약점이 없습니다!</p>
+              )}
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* 생성된 자소서 */}
+        {/* 종합 의견 */}
+        {feedback?.overall_advice && (
+          <div className="bg-indigo-50 rounded-xl p-6 border border-indigo-100">
+            <h4 className="text-indigo-900 mb-2">종합 조언</h4>
+            <p className="text-gray-700">{feedback.overall_advice}</p>
+          </div>
+        )}
+
+        {/* 첨삭된 자소서 */}
         <div className="bg-white rounded-xl shadow-xl p-8 md:p-12">
           <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
             <h2 className="text-gray-900">
-              생성된 자기소개서
+              {feedbackRewrite ? '첨삭 완료된 자기소개서' : '생성된 자기소개서'}
             </h2>
+
             <div className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">
               완성
             </div>
           </div>
-          
-          <div className="prose prose-gray max-w-none">
-            <div className="whitespace-pre-wrap text-gray-800 leading-relaxed">
-              {coverLetter}
-            </div>
+
+          <div className="whitespace-pre-wrap text-gray-800 leading-relaxed">
+            {finalCoverLetter}
           </div>
         </div>
 
-        {/* 안내 메시지 */}
-        <div className="bg-amber-50 rounded-xl p-6 border border-amber-100">
-          <div className="flex gap-3">
-            <span className="text-2xl">💡</span>
-            <div>
-              <h4 className="text-amber-900 mb-2">
-                팁
-              </h4>
-              <ul className="text-sm text-amber-800 space-y-1">
-                <li>• 생성된 자소서를 본인의 경험에 맞게 수정하여 사용하세요</li>
-                <li>• 구체적인 프로젝트명, 기술 스택, 성과를 추가하면 더욱 좋습니다</li>
-                <li>• 회사별 인재상과 직무 설명에 맞게 커스터마이징하세요</li>
-              </ul>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

@@ -5,7 +5,11 @@
     { "path": "./tsconfig.node.json" }
   ],
   "compilerOptions": {
-    "types": ["vite/client"]
+    "moduleResolution": "bundler",
+    "module": "ESNext",
+    "types": ["vite/client"],
+    "jsx": "react-jsx",
+    "lib": ["ES2020", "DOM"]
   },
   "include": [
     "src",

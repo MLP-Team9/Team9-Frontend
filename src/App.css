@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 :root {
   --font-size: 16px;
@@ -128,6 +126,7 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Pretendard-Regular', sans-serif;
   }
 }
 
@@ -138,50 +137,58 @@
   :where(:not(:has([class*=' text-']), :not(:has([class^='text-'])))) {
     h1 {
       font-size: var(--text-2xl);
-      font-weight: var(--font-weight-medium);
+      font-weight: var(--font-weight-bold);
       line-height: 1.5;
+      font-family: 'Pretendard-Bold', sans-serif;
     }
 
     h2 {
       font-size: var(--text-xl);
       font-weight: var(--font-weight-medium);
       line-height: 1.5;
+      font-family: 'Pretendard-Bold', sans-serif;
     }
 
     h3 {
       font-size: var(--text-lg);
       font-weight: var(--font-weight-medium);
       line-height: 1.5;
+      font-family: 'Pretendard-SemiBold', sans-serif;
     }
 
     h4 {
       font-size: var(--text-base);
       font-weight: var(--font-weight-medium);
       line-height: 1.5;
+      font-family: 'Pretendard-Medium', sans-serif;
     }
 
     p {
       font-size: var(--text-base);
       font-weight: var(--font-weight-normal);
       line-height: 1.5;
+      font-family: 'Pretendard-Regular', sans-serif;
     }
 
     label {
       font-size: var(--text-base);
       font-weight: var(--font-weight-medium);
       line-height: 1.5;
+      font-family: 'Pretendard-Medium', sans-serif;
     }
 
     button {
       font-size: var(--text-base);
       font-weight: var(--font-weight-medium);
       line-height: 1.5;
+      font-family: 'Pretendard-Medium', sans-serif;
     }
 
     input {
       font-size: var(--text-base);
       font-weight: var(--font-weight-normal);
       line-height: 1.5;
+      font-family: 'Pretendard-Regular', sans-serif;
     }
   }
 }
