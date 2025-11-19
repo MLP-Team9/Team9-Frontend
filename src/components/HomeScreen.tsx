@@ -1,18 +1,23 @@
 import { useState } from 'react';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
-import { Sparkles, FileText, Zap } from 'lucide-react';
+import { Sparkles, FileText, Zap, Briefcase } from 'lucide-react';
 
 interface HomeScreenProps {
-  onGenerate: (prompt: string) => void;
+  onGenerate: (data: { essay_text: string; job_description: string }) => void;
+  isLoading: boolean;
 }
 
-export function HomeScreen({ onGenerate }: HomeScreenProps) {
-  const [prompt, setPrompt] = useState('');
+export function HomeScreen({ onGenerate, isLoading }: HomeScreenProps) {
+  const [essayText, setEssayText] = useState('');
+  const [jobDescription, setJobDescription] = useState('');
 
   const handleSubmit = () => {
-    if (prompt.trim()) {
-      onGenerate(prompt);
+    if (essayText.trim() && jobDescription.trim()) {
+      onGenerate({
+        essay_text: essayText,
+        job_description: jobDescription
+      });
     }
   };
 
@@ -22,15 +27,18 @@ export function HomeScreen({ onGenerate }: HomeScreenProps) {
     }
   };
 
-  const examplePrompts = [
-    '프론트엔드 개발자 포지션에 지원하려고 합니다. React와 TypeScript 경험을 강조해주세요.',
-    '백엔드 개발 경험과 문제 해결 능력을 중심으로 자소서를 작성해주세요.',
-    '신입 개발자로서의 열정과 학습 능력을 어필하는 자소서를 써주세요.',
-  ];
-
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="max-w-3xl w-full space-y-8">
+      {isLoading && (
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl shadow-lg flex flex-col items-center gap-3">
+            <div className="animate-spin h-8 w-8 rounded-full border-4 border-indigo-600 border-t-transparent"></div>
+            <p className="text-indigo-800 font-semibold">AI 분석 중입니다...</p>
+          </div>
+        </div>
+      )}
+
+      <div className="max-w-4xl w-full space-y-8">
         {/* 헤더 */}
         <div className="text-center space-y-4">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-2xl mb-4">
@@ -42,55 +50,54 @@ export function HomeScreen({ onGenerate }: HomeScreenProps) {
           <p className="text-gray-600 max-w-2xl mx-auto">
             AI가 당신의 IT 커리어 스토리를 전문적인 자기소개서로 완성해드립니다.
             <br />
-            원하는 내용을 입력하면 맞춤형 자소서를 생성해드립니다.
+            자소서와 공고 내용을 입력하면 맞춤형 첨삭을 제공합니다.
           </p>
         </div>
 
         {/* 입력 영역 */}
         <div className="bg-white rounded-2xl shadow-xl p-8 space-y-6">
+          {/* 자소서 입력 */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-indigo-600" />
               <label className="text-gray-700">
-                자소서 작성 요청사항을 입력해주세요
+                자기소개서 내용
               </label>
             </div>
             <Textarea
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
+              value={essayText}
+              onChange={(e) => setEssayText(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="예: 웹 개발 경험과 팀 프로젝트에서의 협업 능력을 강조하는 자소서를 작성해주세요."
+              placeholder="첨삭받을 자소서 내용을 입력해주세요..."
               className="min-h-[200px] resize-none text-gray-800 placeholder:text-gray-400"
             />
-            <p className="text-sm text-gray-500">
-              Cmd/Ctrl + Enter로 빠르게 생성할 수 있습니다
-            </p>
+          </div>
+
+          {/* 직무 설명 입력 */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Briefcase className="w-5 h-5 text-indigo-600" />
+              <label className="text-gray-700">
+                지원 직무 공고
+              </label>
+            </div>
+            <Textarea
+              value={jobDescription}
+              onChange={(e) => setJobDescription(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="지원하려는 직무의 공고 내용을 입력해주세요 (회사명, 직무, 자격요건, 우대사항 등)..."
+              className="min-h-[150px] resize-none text-gray-800 placeholder:text-gray-400"
+            />
           </div>
 
           <Button
             onClick={handleSubmit}
-            disabled={!prompt.trim()}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white h-12"
+            disabled={!essayText.trim() || !jobDescription.trim()}
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white h-12 cursor-pointer"
           >
             <Zap className="w-5 h-5 mr-2" />
-            자소서 생성하기
+            AI 첨삭 시작하기
           </Button>
-        </div>
-
-        {/* 예시 프롬프트 */}
-        <div className="space-y-4">
-          <p className="text-center text-sm text-gray-600">💡 이런 식으로 요청해보세요</p>
-          <div className="grid gap-3">
-            {examplePrompts.map((example, index) => (
-              <button
-                key={index}
-                onClick={() => setPrompt(example)}
-                className="text-left p-4 bg-white/60 hover:bg-white rounded-xl transition-colors border border-indigo-100"
-              >
-                <p className="text-sm text-gray-700">{example}</p>
-              </button>
-            ))}
-          </div>
         </div>
       </div>
     </div>
