@@ -51,25 +51,25 @@
 Colab 메뉴에서: 런타임 → 런타임 유형 변경 → 하드웨어 가속기: GPU
 
 ### 3. 필요한 패키지 설치
-`!pip install flask-cors` (flask cors 방지)
+`!pip install flask-cors` (flask cors 방지)<br/>
 `!pip install pyngrok` (ngrok)
 
 ### 4. 코랩에서 구글 드라이브와 연결 후 업로드한 패키지 경로로 이동
-`from google.colab import drive`
-`drive.mount('/content/drive')`
+`from google.colab import drive`<br/>
+`drive.mount('/content/drive')`<br/>
 `cd /content/drive/MyDrive/[패키지명]/`
 
 ### 5. ngrok auth 토큰으로 인증
-인증 토큰 발급 방법: ngrok 홈페이지에서 로그인 후 대시보드에서 auth token 복사
+인증 토큰 발급 방법: ngrok 홈페이지에서 로그인 후 대시보드에서 auth token 복사<br/>
 `!ngrok config add-authtoken [인증토큰]`
 
 ### 6. 백그라운드에서 백엔드 서버 실행
 `!nohup python /content/drive/MyDrive/[패키지명]/[실행 파일] &`
 
 ### 7. ngrok 실행 후 baseurl 발급
-`from pyngrok import ngrok`
-`public_url = ngrok.connect([포트주소])`
-`print("External URL:", public_url)`
+`from pyngrok import ngrok`<br/>
+`public_url = ngrok.connect([포트주소])`<br/>
+`print("External URL:", public_url)`<br/>
 `ngrok.connect([포트주소)`
 
 ### 프론트에서 연동 테스트
