@@ -24,7 +24,8 @@
 # 2. 실행 환경(Environment)
 
 ### **필요 조건**
-- Node.js v24.11.0
+- vscode가 설치되어 있어야 함
+- Node.js 설치 (버전: v24.11.0 latest)
 - npm
 - Vite 기반 React
 - TailwindCSS
@@ -37,10 +38,13 @@
 
 # 3. 프론트엔드 실행 명령어
 
-### 1. 의존성 설치
+### 1. 실행 환경 구축
+vscode를 실행하고 프론트엔드 리포지토리 로컬에 clone 받기 -> Team9-Frontend 파일 경로로 이동
+
+### 2. 의존성 설치
 `npm install`
 
-### 2. 개발 서버 실행
+### 3. 개발 서버 실행
 `npm run dev`
 
 # 4. 백엔드 로컬 구동 (Google Colab GPU + ngrok)
@@ -73,4 +77,5 @@ Colab 메뉴에서: 런타임 → 런타임 유형 변경 → 하드웨어 가�
 `ngrok.connect([포트주소)`
 
 ### 프론트에서 연동 테스트
-baseurl을 ngrok에서 받은 url로 설정 후 테스트
+baseurl을 ngrok에서 받은 url로 설정(.env 파일에서 VITE_SERVER_URL_API 변수 받은 url로 변경) 후 테스트</br>
+CORS 오류 발생 시 서버 및 프론트 서비스 전부 새로고침 후 재행
