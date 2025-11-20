@@ -117,13 +117,13 @@ export function ResultScreen({
 
           <div className="flex gap-2">
             {/* 복사 버튼 */}
-            <Button onClick={handleCopy} variant="outline" className="bg-white">
+            <Button onClick={handleCopy} variant="outline" className="bg-white cursor-pointer">
               <Copy className="w-4 h-4 mr-2" />
               {copied ? "복사됨!" : "복사하기"}
             </Button>
 
             {/* 다운로드 버튼 */}
-            <Button onClick={handleDownload} variant="outline" className="bg-white">
+            <Button onClick={handleDownload} variant="outline" className="bg-white cursor-pointer">
               <Download className="w-4 h-4 mr-2" />
               다운로드
             </Button>
